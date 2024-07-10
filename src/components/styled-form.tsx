@@ -5,6 +5,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import {
   Select,
@@ -20,7 +21,7 @@ import { z } from "zod";
 import { ScrollArea } from "./ui/scroll-area";
 
 const MAX_UPLOAD_SIZE = 1024 * 1024 * 3; // 3MB
-const ACCEPTED_FILE_TYPES = ["image/png"];
+const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/png"];
 
 const formSchema = z.object({
   name: z
@@ -56,14 +57,19 @@ const formSchema = z.object({
     invalid_type_error: "Brand should be Text",
   }),
   image: z
-    .instanceof(File)
-    .optional()
-    .refine((file) => {
-      return !file || file.size <= MAX_UPLOAD_SIZE;
-    }, "File size must be less than 3MB")
-    .refine((file) => {
-      return ACCEPTED_FILE_TYPES.includes(file.type);
-    }, "File must be a PNG"),
+    .any()
+    .refine(
+      (file): file is File => file instanceof File,
+      "Selected file is not an image"
+    )
+    .refine(
+      (file) => file.size <= MAX_UPLOAD_SIZE,
+      "Image size should be less than " + MAX_UPLOAD_SIZE
+    )
+    .refine(
+      (file) => ACCEPTED_FILE_TYPES.includes(file.type),
+      "Only JPEG and PNG images are allowed"
+    ),
 });
 
 const names: string[] = [
@@ -117,6 +123,7 @@ const StyledForm = () => {
                       <SelectValue placeholder="Select your name." />
                     </SelectTrigger>
                   </FormControl>
+                  <FormMessage />
                   <SelectContent>
                     {names.map((item) => (
                       <SelectItem value={item} key={item}>
@@ -141,6 +148,7 @@ const StyledForm = () => {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -153,6 +161,7 @@ const StyledForm = () => {
                 <FormControl>
                   <Input type="" placeholder="John" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -166,6 +175,7 @@ const StyledForm = () => {
                 <FormControl>
                   <Input placeholder="Peugeot" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -178,6 +188,7 @@ const StyledForm = () => {
                 <FormControl>
                   <Input placeholder="Valeo" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -190,6 +201,7 @@ const StyledForm = () => {
                 <FormControl>
                   <Input type="file" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
